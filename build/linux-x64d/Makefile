@@ -24,8 +24,8 @@ EXTRA_GN_ARGS := \
 	use_custom_libcxx=false \
 	use_custom_libcxx_for_host=false
 
-.PHONY: all
-all: clean build package
+.PHONY: alld
+all: clean buildd package
 
 .PHONY: package
 package: common-package
@@ -40,7 +40,7 @@ patch: common-patch
 	patch -p2 < $(PATCH_DIR)/disable_use_hermetic_xcode_on_linux.patch && \
 	patch -p2 < $(PATCH_DIR)/linux_is_pod_deprecate.patch
 
-.PHONY: build
+.PHONY: buildd
 build: download patch
 	cd $(SRC_DIR) && \
 	gn gen $(BUILD_DIR) --args='$(EXTRA_GN_ARGS) $(CC_WRAPPER)' && \
