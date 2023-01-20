@@ -53,8 +53,7 @@ common-patch:
 
 .PHONY: common-package
 common-package: copy
-	cd $(PACKAGE_DIR) && \
-	tar -Jcf $(subst $(space),,$(PACKAGE_NAME)).tar.xz include lib NOTICE VERSION
+	cd $(PACKAGE_DIR)
 
 .PHONY: generate-licenses
 generate-licenses:
@@ -62,12 +61,17 @@ generate-licenses:
 
 .PHONY: common-copy
 common-copy: generate-licenses
-	rm -rf $(PACKAGE_DIR)/{lib,include,NOTICE,VERSION}
-	mkdir -p $(PACKAGE_DIR)/lib
+	mkdir -p $(PACKAGE_DIR)/debug
 	mkdir -p $(PACKAGE_DIR)/include
-	cp $(BUILD_DIR)/obj/libwebrtc.a $(PACKAGE_DIR)/lib/libwebrtc.a
+	cp $(BUILD_DIR)/obj/libwebrtc.a $(PACKAGE_DIR)/debug/libwebrtc.a
 
-	rsync -amv '--include=*/' '--include=*.h' '--include=*.hpp' '--exclude=*' $(SRC_DIR)/. $(PACKAGE_DIR)/include/.
+	rsync -q -amv '--include=*/' '--include=*.h' '--include=*.hpp' '--exclude=*' $(SRC_DIR)/. $(PACKAGE_DIR)/include/.
 
 	cp -f $(BUILD_DIR)/LICENSE.md $(PACKAGE_DIR)/NOTICE
 	echo '$(WEBRTC_VERSION)' > $(PACKAGE_DIR)/VERSION
+
+.PHONY: common-move
+common-move: 
+	rm -rf $(PACKAGE_DIR)/{lib,debug,release,include,NOTICE,VERSION}
+	mkdir -p $(PACKAGE_DIR)/release
+	mv -f $(BUILD_DIR)/obj/libwebrtc.a $(PACKAGE_DIR)/release/libwebrtc.a

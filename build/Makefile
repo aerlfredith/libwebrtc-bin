@@ -44,7 +44,7 @@ endif
 define generateRules
 
 .PHONY: $(1)
-$(1): $(1).clean $(1).build $(1).package
+$(1): $(1).clean $(1).build $(1).move $(1).buildd $(1).package
 
 .PHONY: $(1).clean
 $(1).clean:
@@ -57,6 +57,10 @@ $(1).fetch: depot_tools
 $(1).build: prepare $(CCACHE) $(1).fetch sync
 	make $(SUB_DIR_OPTS) -C $(1) build
 
+.PHONY: $(1).buildd
+$(1).buildd: prepare $(CCACHE) $(1).fetch sync
+	make $(SUB_DIR_OPTS) -C $(1) buildd
+
 .PHONY: $(1).build-nofetch
 $(1).build-nofetch: $(CCACHE) sync
 	rm -rf $(BUILD_DIR)
@@ -65,6 +69,10 @@ $(1).build-nofetch: $(CCACHE) sync
 .PHONY: $(1).copy
 $(1).copy:
 	make $(SUB_DIR_OPTS) -C $(1) copy
+
+.PHONY: $(1).move
+$(1).move:
+	make $(SUB_DIR_OPTS) -C $(1) move
 
 .PHONY: $(1).package
 $(1).package:
