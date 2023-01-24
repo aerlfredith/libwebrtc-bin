@@ -24,7 +24,7 @@ EXTRA_GN_ARGS := \
 	use_custom_libcxx=false \
 	use_custom_libcxx_for_host=false
 
-EXTRA_GN_ARGS := \
+EXTRA_GND_ARGS := \
 	target_os="$(TARGET_OS)" \
 	target_cpu="$(TARGET_CPU)" \
 	is_debug=true \
