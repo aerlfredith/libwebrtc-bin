@@ -57,7 +57,7 @@ patch: common-patch
 	patch -p2 < $(PATCH_DIR)/4k_linux.patch && \
 	patch -p2 < $(PATCH_DIR)/disable_use_hermetic_xcode_on_linux.patch && \
 	patch -p2 < $(PATCH_DIR)/linux_is_pod_deprecate.patch && \
-	patch -p2 < $(PATCH_DIR)/build_json.diff
+	patch < $(PATCH_DIR)/build_json.diff
 
 .PHONY: build
 build: download patch
