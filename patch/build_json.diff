@@ -1,0 +1,12 @@
+diff --git a/BUILD.gn b/BUILD.gn
+index 259019268b..f8e462e66e 100644
+--- a/BUILD.gn
++++ b/BUILD.gn
+@@ -498,6 +498,7 @@ if (!build_with_chromium) {
+       "pc:libjingle_peerconnection",
+       "pc:rtc_pc",
+       "rtc_base",
++      "rtc_base:rtc_json",
+       "sdk",
+       "video",
+     ]

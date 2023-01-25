@@ -14,20 +14,12 @@ foreach($line in $lines){
   }
 }
 
-$7Z_DIR = Join-Path (Resolve-Path ".").Path "7z"
-
 # 処理前に以前のファイルを削除する
 if (Test-Path vswhere.exe) {
   Remove-Item vswhere.exe -Force
 }
-if (Test-Path $7Z_DIR) {
-    Remove-Item $7Z_DIR -Force -Recurse
-}
 
 Invoke-WebRequest -Uri "https://github.com/microsoft/vswhere/releases/download/3.0.3/vswhere.exe" -OutFile vswhere.exe
-
-Invoke-WebRequest -Uri "https://jaist.dl.sourceforge.net/project/sevenzip/7-Zip/22.01/7z2201-x64.exe" -OutFile 7z-x64.exe
-./7z-x64.exe /S /D="""$7Z_DIR"""
 
 # vsdevcmd.bat の設定を入れる
 # https://github.com/microsoft/vswhere/wiki/Find-VC
@@ -97,6 +89,7 @@ Push-Location $WEBRTC_DIR
     git apply --ignore-whitespace -p 2 $PATCH_DIR\add_licenses.patch
     git apply --ignore-whitespace -p 2 $PATCH_DIR\windows_fix_towupper.patch
     git apply --ignore-whitespace $PATCH_DIR\windows_fix_abseil.patch
+    git apply --ignore-whitespace $PATCH_DIR\build_json.diff
   Pop-Location
 Pop-Location
 
@@ -110,17 +103,9 @@ Push-Location $WEBRTC_DIR\src
   # WebRTC Releaseビルド x64
   gn gen $BUILD_DIR\release_x64 --args='is_debug=false treat_warnings_as_errors=false rtc_use_h264=false rtc_include_tests=false rtc_build_tools=false rtc_build_examples=false is_component_build=false use_rtti=true strip_debug_info=true symbol_level=0 use_custom_libcxx=false'
   ninja -C "$BUILD_DIR\release_x64"
-
-  # WebRTC Debugビルド x86
-  gn gen $BUILD_DIR\debug_x86 --args='target_os=\"win\" target_cpu=\"x86\" is_debug=true treat_warnings_as_errors=false rtc_use_h264=false rtc_include_tests=false rtc_build_tools=false rtc_build_examples=false is_component_build=false use_rtti=true use_custom_libcxx=false'
-  ninja -C "$BUILD_DIR\debug_x86"
-
-  # WebRTC Releaseビルド x86
-  gn gen $BUILD_DIR\release_x86 --args='target_os=\"win\" target_cpu=\"x86\" is_debug=false treat_warnings_as_errors=false rtc_use_h264=false rtc_include_tests=false rtc_build_tools=false rtc_build_examples=false is_component_build=false use_rtti=true strip_debug_info=true symbol_level=0 use_custom_libcxx=false'
-  ninja -C "$BUILD_DIR\release_x86"
 Pop-Location
 
-foreach ($build in @("debug_x64", "release_x64", "debug_x86", "release_x86")) {
+foreach ($build in @("debug_x64", "release_x64")) {
   ninja -C "$BUILD_DIR\$build" audio_device_module_from_input_and_output
 
   # このままだと webrtc.lib に含まれないファイルがあるので、いくつか追加する
@@ -162,26 +147,3 @@ Copy-Item "$BUILD_DIR\LICENSE.md" "$BUILD_DIR\package\webrtc\NOTICE"
 # x64用ライブラリコピー
 Copy-Item $BUILD_DIR\debug_x64\obj\webrtc.lib $BUILD_DIR\package\webrtc\debug\
 Copy-Item $BUILD_DIR\release_x64\obj\webrtc.lib $BUILD_DIR\package\webrtc\release\
-
-# ファイルを圧縮する
-New-Item $PACKAGE_DIR -ItemType Directory -Force
-Push-Location $BUILD_DIR\package\webrtc
-  cmd /s /c """$7Z_DIR\7z.exe""" a -bsp0 -t7z:r -ssc -ms+ $PACKAGE_DIR\libwebrtc-win-x64.7z *
-Pop-Location
-
-
-# ライセンス生成 (x86)
-Push-Location $WEBRTC_DIR\src
-  vpython3 tools_webrtc\libs\generate_licenses.py --target :webrtc "$BUILD_DIR\" "$BUILD_DIR\debug_x86" "$BUILD_DIR\release_x86"
-Pop-Location
-Copy-Item "$BUILD_DIR\LICENSE.md" "$BUILD_DIR\package\webrtc\NOTICE"
-
-# x86用ファイル一式作成
-Copy-Item $BUILD_DIR\debug_x86\obj\webrtc.lib $BUILD_DIR\package\webrtc\debug\
-Copy-Item $BUILD_DIR\release_x86\obj\webrtc.lib $BUILD_DIR\package\webrtc\release\
-
-# ファイルを圧縮する
-New-Item $PACKAGE_DIR -ItemType Directory -Force
-Push-Location $BUILD_DIR\package\webrtc
-  cmd /s /c """$7Z_DIR\7z.exe""" a -bsp0 -t7z:r -ssc -ms+ $PACKAGE_DIR\libwebrtc-win-x86.7z *
-Pop-Location
