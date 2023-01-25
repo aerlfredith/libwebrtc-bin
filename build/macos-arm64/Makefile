@@ -69,7 +69,7 @@ move: common-move
 .PHONY: patch
 patch: common-patch
 	cd $(SRC_DIR) && \
-	patch -p2 < $(PATCH_DIR)/macos_h264_encoder.patch
+	patch -p2 < $(PATCH_DIR)/macos_h264_encoder.patch && \
 	patch -p2 < $(PATCH_DIR)/build_json.diff
 
 .PHONY: build
