@@ -53,7 +53,8 @@ common-patch:
 
 .PHONY: common-package
 common-package: copy
-	cd $(PACKAGE_DIR)
+	cd $(PACKAGE_DIR) && \
+	tar -Jcf $(subst $(space),,$(PACKAGE_NAME)).tar.xz include release NOTICE VERSION
 
 .PHONY: generate-licenses
 generate-licenses:
